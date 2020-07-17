@@ -1,5 +1,5 @@
-import us from "./us";
+import lancashire from "./lancashire";
 
 export default {
-  us
+  lancashire
 };
