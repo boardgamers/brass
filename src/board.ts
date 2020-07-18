@@ -1,104 +1,38 @@
 import { sortBy, flatten, flattenDeep, fromPairs, pick } from "lodash";
 import type PlayerColor from "./enums/player-color";
-import Resource from "./enums/resource";
-import type Plant from "./plant";
 import { shuffle } from "./utils/random";
-import plants from "./data/plants";
-import maps from "./maps";
+import type Card from "./card";
+import cardSet from "./data/cards";
+import { Link, Location } from "./location";
+import { locations, links} from "./maps/lancashire";
 import { MajorPhase } from "./enums/phases";
 import { EventEmitter } from "events";
 import { GameEventName } from "./log";
 
 class Board extends EventEmitter {
   map: {
-    model: "us";
-
-    cities: {[city: string]: {players: PlayerColor[]}};
-    links: {nodes: [string, string], cost: number}[];
+    model: "lancashire";
+    locations: Location[],
+    links: Link[]
   };
 
-  pool: {
-    resources: {[key in Resource]: number};
-  } = {
-    resources: {
-      oil: 24,
-      coal: 24,
-      garbage: 24,
-      uranium: 12
-    }
-  };
-
-  market: {
-    current: {
-      plants: Plant[];
-      max: number;
-    };
-    future: {
-      plants: Plant[];
-      max: number;
-    };
-  };
-
-  commodities: Array<{
-    price: number,
-    resources: {
-      current: {[key in Resource]?: number},
-      max: {[key in Resource]?: number}
-    }
-  }> = [
-    {price: 1, resources: {max: {coal: 3, oil: 3, uranium: 1, garbage: 3}, current: {coal: 3, oil: 0, uranium: 0, garbage: 0}}},
-    {price: 2, resources: {max: {coal: 3, oil: 3, uranium: 1, garbage: 3}, current: {coal: 3, oil: 0, uranium: 0, garbage: 0}}},
-    {price: 3, resources: {max: {coal: 3, oil: 3, uranium: 1, garbage: 3}, current: {coal: 3, oil: 3, uranium: 0, garbage: 0}}},
-    {price: 4, resources: {max: {coal: 3, oil: 3, uranium: 1, garbage: 3}, current: {coal: 3, oil: 3, uranium: 0, garbage: 0}}},
-    {price: 5, resources: {max: {coal: 3, oil: 3, uranium: 1, garbage: 3}, current: {coal: 3, oil: 3, uranium: 0, garbage: 0}}},
-    {price: 6, resources: {max: {coal: 3, oil: 3, uranium: 1, garbage: 3}, current: {coal: 3, oil: 3, uranium: 0, garbage: 0}}},
-    {price: 7, resources: {max: {coal: 3, oil: 3, uranium: 1, garbage: 3}, current: {coal: 3, oil: 3, uranium: 0, garbage: 3}}},
-    {price: 8, resources: {max: {coal: 3, oil: 3, uranium: 1, garbage: 3}, current: {coal: 3, oil: 3, uranium: 0, garbage: 3}}},
-    {price: 10, resources: {max: {uranium: 1}, current: {uranium: 0}}},
-    {price: 12, resources: {max: {uranium: 1}, current: {uranium: 0}}},
-    {price: 14, resources: {max: {uranium: 1}, current: {uranium: 1}}},
-    {price: 16, resources: {max: {uranium: 1}, current: {uranium: 1}}},
-  ];
-
-  draw: {
-    plants: {
-      current: Plant[];
-      future: Plant[];
-    }
-  }
+  cards: Card[];
 
   constructor() {
     super();
   }
 
   init(players: number, rng: () => number) {
-    this.draw = {
-      plants: {
-        current: [plants.find(plant => plant.price === 13)!, ...shuffle(plants.filter(plant => plant.price > 10 && plant.price !== 13), rng)],
-        future: []
-      }
-    };
-
-    this.market = {
-      current: {
-        plants: plants.slice(0, 4),
-        max: 4
-      },
-      future: {
-        plants: plants.slice(4, 8),
-        max: 4
-      }
-    };
-
-    const model = maps.us;
-
-    const zoneByCities = fromPairs(flattenDeep(model.zones.map(zone => zone.cities.map(city => [city, zone.key]))) as [string, string][]);
-
+    this.cards = [];
+    cardSet.forEach(cs => { for ( let i=0; i < cs.num; i++) { this.cards.push(cs.card); }; });
+    
     this.map = {
-      model: "us",
-      cities: ([] as string[]).concat(...model.zones.map(zone => zone.cities)).reduce((acc, city) => ({...acc, [city]: {players: [], zone: zoneByCities[city]}}), {}),
-      links: model.links,
+      model: "lancashire",
+      locations: locations  ,
+      links: links,
     };
+
+    locations.map(loc => {city: loc.city, spaces: loc.spaces, gold: loc.gold})
 
     const nZones = [3, 3, 4, 5, 5][6 - players];
 
