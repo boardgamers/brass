@@ -1,5 +1,5 @@
-import lancashire from "./lancashire";
+import {lancashireLocations, lancashireLinks} from "./lancashire";
 
 export default {
-  lancashire
+  lancashireLocations, lancashireLinks
 };

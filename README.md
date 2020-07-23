@@ -1,4 +1,4 @@
-Typescript engine for Powergrid, made for [boardgamers](https://boardgamers.space) but it can be used with any other website or service.
+Typescript engine for Brass, made for [boardgamers](https://boardgamers.space) but it can be used with any other website or service.
 
 ## Setup
 
@@ -38,5 +38,5 @@ another module, do this:
 yarn link
 
 ## In the other project's folder
-yarn link powergrid
+yarn link brass
 ```

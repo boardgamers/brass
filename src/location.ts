@@ -1,25 +1,24 @@
 import {LancashireCity} from "./maps/lancashire";
 import IndustryType from "./enums/industries"
 
-interface Link {
+interface BoardLink {
   nodes: [LancashireCity, LancashireCity];
   canal:boolean;
   rail:boolean;
   player?: number;
 };
 
-interface Space {
-  allowedIndustries: IndustryType[];
+interface BoardSpace {
+  possible?: IndustryType[];
   industry?: string;
   player?: number;
   resources? : { coal?: number, iron?: number};
   gold?: number;
 }
 
-interface Location {
+interface BoardLocation {
   city: LancashireCity;
-  spaces?: Space[];
-  gold?: number;
+  spaces?: BoardSpace[];
 }
 
-export { Link, Location};
+export { BoardLink, BoardLocation};
