@@ -6,23 +6,22 @@ import Resource from "./enums/resource";
 
 export enum GameEventName {
   GameStart = "gamestart",
-  PeriodStart = "periodstart",
+  MajorPhaseChange = "majorphasechange",
   RoundStart = "roundstart",
   VictoryPoint = "vp",
   TurnOrder = "turnorder",
   CurrentPlayer = "currentplayer",
   PhaseChange = "phasechange",
-  MajorPhaseChange = "majorphasechange",
+  
   GameEnd = "gameend"
 }
 
 export interface GameEventData {
-  [GameEventName.GameStart]: {},
-  [GameEventName.PeriodStart]: {},
-  [GameEventName.RoundStart]: {},
+  [GameEventName.MajorPhaseChange]: {phase: MajorPhase},
+  [GameEventName.RoundStart]: {round: number},
   [GameEventName.VictoryPoint]: {},
   [GameEventName.PhaseChange]: {phase: RoundPhase},
-  [GameEventName.MajorPhaseChange]: {phase: MajorPhase},
+  
   [GameEventName.TurnOrder]: {turnorder: PlayerColor[]},
   [GameEventName.CurrentPlayer]: {player: PlayerColor}
 }

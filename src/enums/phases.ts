@@ -4,9 +4,6 @@ export enum MajorPhase {
 };
 
 export enum RoundPhase {
-  GameSetup = "gamesetup",
-  PeriodSetup= "periodsetup",
-  RoundSetup = "roundsetup",
   PlayCards = "cards",
-  VP = "vp"
+
 }

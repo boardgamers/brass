@@ -19,26 +19,6 @@ export interface CommandArguments {
 }
 
 const commands: CommandStruct<RoundPhase, MoveName, Player, Engine, AvailableCommandArguments, CommandArguments> = {
-  [RoundPhase.GameSetup]: {
-    started(engine: Engine) {
-      engine.addEvent(GameEventName.GameStart, {});
-    }
-  },
-  [RoundPhase.PeriodSetup]: {
-    started(engine: Engine) {
-      engine.addEvent(GameEventName.PeriodStart, {});
-    }
-  },
-  [RoundPhase.RoundSetup]: {
-    started(engine: Engine) {
-      engine.addEvent(GameEventName.RoundStart, {});
-    }
-  },
-  [RoundPhase.VP]: {
-    started(engine: Engine) {
-      engine.addEvent(GameEventName.VictoryPoint, {});
-    }
-  },
   [RoundPhase.PlayCards]: {
     moves: {
       [MoveName.TakeLoan]: {

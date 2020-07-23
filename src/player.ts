@@ -25,7 +25,6 @@ export class Player extends EventEmitter {
 
   init() {
     // assign industries cards
-
   }
 
   beginRound() {
