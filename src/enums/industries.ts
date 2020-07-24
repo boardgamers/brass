@@ -3,6 +3,7 @@ export enum IndustryType {
   Port = "port",
   CoalMine = "coal",
   IronWorks = "iron",
+  Shipyard = "ship"
 };
 
 export default IndustryType;
