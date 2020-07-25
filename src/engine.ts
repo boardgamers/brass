@@ -40,10 +40,6 @@ export class Engine extends BaseEngine<Player, RoundPhase, MoveName, GameEventNa
     this.majorPhaseChange(MajorPhase.CanalPhase);
   }
 
-  event_gameStart() {
-
-  }
-
   majorPhaseChange(phase: MajorPhase) {
     this.addEvent(GameEventName.MajorPhaseChange, { phase: MajorPhase.CanalPhase });
     // set Demand tracks
@@ -52,11 +48,11 @@ export class Engine extends BaseEngine<Player, RoundPhase, MoveName, GameEventNa
     this.board.cards = shuffle([...this.board.cards], this.rng);
     // discard cards
     this.board.cards = this.board.cards.slice(discard[this.players.length - 3][this.majorPhase]);
-
-    this.addEvent(GameEventName.RoundStart, { round: this.round + 1 });
+    this.roundStart();
   }
 
-  event_roundStart() {
+  roundStart() {
+    this.addEvent(GameEventName.RoundStart, { round: this.round + 1 });
     for (const player of this.players) {
       // reset moves
       player.numMoves = 0;
@@ -104,14 +100,12 @@ export class Engine extends BaseEngine<Player, RoundPhase, MoveName, GameEventNa
         const event = item.event;
         switch (event.name) {
           case GameEventName.GameStart:
-            this.event_gameStart();
             break;
           case GameEventName.MajorPhaseChange:
             this.majorPhase = event.phase;
             break;
           case GameEventName.RoundStart:
             this.round = event.round;
-            this.event_roundStart();
             break;
           case GameEventName.RefillHand:
             for (let i = 1; i <= event.numCards; i++) {
