@@ -32,28 +32,28 @@ export class Engine extends BaseEngine<Player, RoundPhase, MoveName, GameEventNa
     }
 
     for (const player of this.players) {
-      player.on("event", (event, data) => this.addEvent(event.name, {...data, player: player.color}));
+      player.on("event", (event, data) => this.addEvent(event.name, { ...data, player: player.color }));
     }
     this.board.on("event", (event, data) => this.addEvent(event.name, data));
 
     this.addEvent(GameEventName.GameStart);
-    this.addEvent(GameEventName.MajorPhaseChange, {phase: MajorPhase.CanalPhase});
-
+    this.majorPhaseChange(MajorPhase.CanalPhase);
   }
 
   event_gameStart() {
 
   }
 
-  event_majorPhaseChange() {
+  majorPhaseChange(phase: MajorPhase) {
+    this.addEvent(GameEventName.MajorPhaseChange, { phase: MajorPhase.CanalPhase });
     // set Demand tracks
     // shuffle Distant Market
     this.board.createDeck();
-    shuffle(this.board.cards, this.rng); 
+    this.board.cards = shuffle([...this.board.cards], this.rng);
     // discard cards
     this.board.cards = this.board.cards.slice(discard[this.players.length - 3][this.majorPhase]);
 
-    this.addEvent(GameEventName.RoundStart, {round: this.round + 1});
+    this.addEvent(GameEventName.RoundStart, { round: this.round + 1 });
   }
 
   event_roundStart() {
@@ -62,26 +62,23 @@ export class Engine extends BaseEngine<Player, RoundPhase, MoveName, GameEventNa
       player.numMoves = 0;
       // refill cards if still cards to draw
       if (this.board.cards.length >= discard[this.players.length - 3][this.majorPhase]) {
-        for (let i = 1; i< 8 - player.cards.length ; i++){
-          const card = this.board.cards.slice()[0];
-          player.cards.push( card )
-        }
-      };
+        this.addEvent(GameEventName.RefillHand, { player: this.currentPlayer, numCards: 8 - player.cards.length });  
+      }
       // add income
     }
-    
+
     // new turnorder based on spent in previous round
     const sortedPlayers = sortBy([...this.players], "spent");
-    this.addEvent(GameEventName.TurnOrder, {turnorder: sortedPlayers.map(player => player.color)});
+    this.addEvent(GameEventName.TurnOrder, { turnorder: sortedPlayers.map(player => player.color) });
     // set first player
-    this.addEvent(GameEventName.CurrentPlayer, {player: this.turnorder[0]});
-    this.addEvent(GameEventName.PhaseChange, {phase: RoundPhase.PlayCards});
+    this.addEvent(GameEventName.CurrentPlayer, { player: this.turnorder[0] });
+    this.addEvent(GameEventName.PhaseChange, { phase: RoundPhase.PlayCards });
   }
 
 
   switchToNextPlayer() {
     // player has to do two moves. Only one in first round
-    if ( this.player(this.currentPlayer).numMoves<=2 && !(this.round === 1)) {
+    if (this.player(this.currentPlayer).numMoves <= 2 && !(this.round === 1)) {
       return;
     }
 
@@ -110,13 +107,17 @@ export class Engine extends BaseEngine<Player, RoundPhase, MoveName, GameEventNa
             this.event_gameStart();
             break;
           case GameEventName.MajorPhaseChange:
-              this.majorPhase = event.phase;
-              this.event_majorPhaseChange();
-              break;
+            this.majorPhase = event.phase;
+            break;
           case GameEventName.RoundStart:
-              this.round = event.round;
-              this.event_roundStart();
-              break;
+            this.round = event.round;
+            this.event_roundStart();
+            break;
+          case GameEventName.RefillHand:
+            for (let i = 1; i <= event.numCards; i++) {
+              this.player(event.player).cards.push(this.board.drawCard()!);
+            }
+            break;
           case GameEventName.PhaseChange:
             this.phase = event.phase;
             break;

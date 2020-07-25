@@ -8,20 +8,20 @@ export enum GameEventName {
   GameStart = "gamestart",
   MajorPhaseChange = "majorphasechange",
   RoundStart = "roundstart",
+  RefillHand = "refillhand",
   VictoryPoint = "vp",
   TurnOrder = "turnorder",
   CurrentPlayer = "currentplayer",
   PhaseChange = "phasechange",
-  
   GameEnd = "gameend"
 }
 
 export interface GameEventData {
   [GameEventName.MajorPhaseChange]: {phase: MajorPhase},
   [GameEventName.RoundStart]: {round: number},
+  [GameEventName.RefillHand]: {player: PlayerColor, numCards: number},
   [GameEventName.VictoryPoint]: {},
-  [GameEventName.PhaseChange]: {phase: RoundPhase},
-  
+  [GameEventName.PhaseChange]: {phase: RoundPhase}, 
   [GameEventName.TurnOrder]: {turnorder: PlayerColor[]},
   [GameEventName.CurrentPlayer]: {player: PlayerColor}
 }

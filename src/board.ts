@@ -26,8 +26,12 @@ class Board extends EventEmitter {
   init(players: number, rng: () => number) {
     this.cards = [];
     // populates the board
-    this.map.locations = lancashireLocations;
-    this.map.links = lancashireLinks;
+
+    this.map = {
+      model: "lancashire",
+      locations: lancashireLocations,
+      links: lancashireLinks
+    };
 
     const mapLinks = this.mapLinks();
   }
