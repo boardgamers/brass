@@ -4,7 +4,7 @@ import { shuffle } from "./utils/random";
 import type Card from "./card";
 import cardSet from "./data/cards";
 import { BoardLink, BoardLocation } from "./location";
-import { lancashireLocations, lancashireLinks} from "./maps/lancashire";
+import { lancashireLocations, lancashireLinks } from "./maps/lancashire";
 import IndustryType from "./enums/industries";
 import { MajorPhase } from "./enums/phases";
 import { EventEmitter } from "events";
@@ -55,10 +55,10 @@ class Board extends EventEmitter {
 
   createDeck() {
     this.cards = [];
-    cardSet.forEach(cs => { for ( let i=0; i < cs.num; i++) { this.cards.push(cs.card); }; });
+    cardSet.forEach(cs => { for (let i = 0; i < cs.num; i++) { this.cards.push(cs.card); }; });
   }
 
-  drawCard(): Card | undefined  {
+  drawCard(): Card | undefined {
     return this.cards.shift();
   }
 }

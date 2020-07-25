@@ -18,7 +18,7 @@ export class Engine extends BaseEngine<Player, RoundPhase, MoveName, GameEventNa
   board: Board;
   majorPhase: MajorPhase;
 
-  init (players: number, seed: string) {
+  init(players: number, seed: string) {
     this.seed = seed;
     this.board = new Board();
     this.board.init(players, this.rng);
@@ -86,16 +86,16 @@ export class Engine extends BaseEngine<Player, RoundPhase, MoveName, GameEventNa
     if (currentIndex + 1 === this.turnorder.length) {
       // last round
       if (this.round === lastRound[this.players.length - 3] || this.round === 2 * lastRound[this.players.length - 3])
-        this.addEvent(GameEventName.PhaseChange, {phase: RoundPhase.VP});
+        this.addEvent(GameEventName.PhaseChange, { phase: RoundPhase.PlayCards });
       else
-        this.addEvent(GameEventName.RoundStart, {round: this.round + 1})
+        this.addEvent(GameEventName.RoundStart, { round: this.round + 1 });
     } else {
       this.currentPlayer = this.turnorder[currentIndex + 1];
     }
   }
 
   addEvent<name extends GameEventName>(name: name, data?: name extends keyof GameEventData ? GameEventData[name] : undefined) {
-    this.addLog({kind: "event", event: {name, ...(data ?? {})} as GameEvent})
+    this.addLog({ kind: "event", event: { name, ...(data ?? {}) } as GameEvent });
   }
 
   processLogItem(item: LogItem) {
@@ -136,8 +136,8 @@ export class Engine extends BaseEngine<Player, RoundPhase, MoveName, GameEventNa
             const player = this.player(item.player);
             player.money += move.data.loan;
             // TD decrease income
-            
-            player.cards.splice( player.cards.findIndex( card => (card.city === move.data.card.city || card.industry === move.data.card.industry)));
+
+            player.cards.splice(player.cards.findIndex(card => (card.city === move.data.card.city || card.industry === move.data.card.industry)));
             player.numMoves += 1;
             this.switchToNextPlayer();
             break;
@@ -146,7 +146,7 @@ export class Engine extends BaseEngine<Player, RoundPhase, MoveName, GameEventNa
     }
   }
 
-  
+
 
 
   fillUpPlayerCards(player: Player) {

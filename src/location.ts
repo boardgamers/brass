@@ -1,12 +1,12 @@
 import {LancashireCity} from "./maps/lancashire";
-import IndustryType from "./enums/industries"
+import IndustryType from "./enums/industries";
 
 interface BoardLink {
   nodes: [LancashireCity, LancashireCity];
   canal:boolean;
   rail:boolean;
   player?: number;
-};
+}
 
 interface BoardSpace {
   possible?: IndustryType[];
