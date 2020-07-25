@@ -41,7 +41,7 @@ export class Engine extends BaseEngine<Player, RoundPhase, MoveName, GameEventNa
   }
 
   majorPhaseChange(phase: MajorPhase) {
-    this.addEvent(GameEventName.MajorPhaseChange, { phase: MajorPhase.CanalPhase });
+    this.addEvent(GameEventName.MajorPhaseChange, { phase });
     // set Demand tracks
     // shuffle Distant Market
     this.board.createDeck();
@@ -57,8 +57,8 @@ export class Engine extends BaseEngine<Player, RoundPhase, MoveName, GameEventNa
       // reset moves
       player.numMoves = 0;
       // refill cards if still cards to draw
-      if (this.board.cards.length >= discard[this.players.length - 3][this.majorPhase]) {
-        this.addEvent(GameEventName.RefillHand, { player: this.currentPlayer, numCards: 8 - player.cards.length });  
+      if (this.board.cards.length > 0) {
+        this.addEvent(GameEventName.RefillHand, { player: player.color, cards: this.board.cards.splice(0, 8 - player.cards.length) });  
       }
       // add income
     }
@@ -108,9 +108,7 @@ export class Engine extends BaseEngine<Player, RoundPhase, MoveName, GameEventNa
             this.round = event.round;
             break;
           case GameEventName.RefillHand:
-            for (let i = 1; i <= event.numCards; i++) {
-              this.player(event.player).cards.push(this.board.drawCard()!);
-            }
+            this.player(event.player).cards.push(...event.cards);
             break;
           case GameEventName.PhaseChange:
             this.phase = event.phase;

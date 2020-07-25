@@ -3,6 +3,7 @@ import type PlayerColor from "./enums/player-color";
 import type { Command } from "./commands";
 import { MoveName } from "./enums/moves";
 import Resource from "./enums/resource";
+import Card from "./card";
 
 export enum GameEventName {
   GameStart = "gamestart",
@@ -19,7 +20,7 @@ export enum GameEventName {
 export interface GameEventData {
   [GameEventName.MajorPhaseChange]: {phase: MajorPhase},
   [GameEventName.RoundStart]: {round: number},
-  [GameEventName.RefillHand]: {player: PlayerColor, numCards: number},
+  [GameEventName.RefillHand]: {player: PlayerColor, cards: Card[]},
   [GameEventName.VictoryPoint]: {},
   [GameEventName.PhaseChange]: {phase: RoundPhase}, 
   [GameEventName.TurnOrder]: {turnorder: PlayerColor[]},
