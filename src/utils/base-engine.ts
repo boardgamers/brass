@@ -15,7 +15,7 @@ export default abstract class BaseEngine<
   CommandData extends BaseCommandData<MoveName> = BaseCommandData<MoveName>> {
 
   players: Player[];
-  round: number = 0;
+  round = 0;
   log: LogItem[] = [];
   availableCommands?: AvailableCommand<MoveName, AvailableCommandData, PlayerId>[];
   ended = false;
@@ -139,7 +139,7 @@ export default abstract class BaseEngine<
       players: this.players,
       phase: this.phase,
       availableCommands: this.availableCommands
-    }
+    };
   }
 
   fromJSON(data: ReturnType<this["toJSON"]>) {

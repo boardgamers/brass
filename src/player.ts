@@ -9,13 +9,13 @@ import Industry from "./industry";
 
 export class Player extends EventEmitter {
   name?: string;
-  money: number = 30;
-  spent: number = 0;
+  money = 30;
+  spent = 0;
   cards: Card[] = [];
   locations: string[] = [];
   industries: Industry[] = [];
-  linksAvailable: number = 12;
-  numMoves: number = 0;
+  linksAvailable = 12;
+  numMoves = 0;
   
 
   constructor (public color: PlayerColor, initialBid: number) {

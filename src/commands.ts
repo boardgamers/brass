@@ -35,7 +35,7 @@ const commands: CommandStruct<RoundPhase, MoveName, Player, Engine, AvailableCom
       }
     }
   }
-}
+};
 
 export type Command = BaseCommand<MoveName, CommandArguments>;
 

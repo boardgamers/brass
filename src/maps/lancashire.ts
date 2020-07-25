@@ -13,7 +13,7 @@ const lancashireLinks: BoardLink[] = [
   { nodes: ["wigan", "blackburn"], canal: true, rail: true },
   { nodes: ["preston", "blackburn"], canal: false, rail: true },
   { nodes: ["wigan", "southport"], canal: false, rail: true },
-]
+];
 
 const lancashireLocations: BoardLocation[] = [
   { city: "blackburn", spaces: [{ possible: [IndustryType.CoalMine, IndustryType.CottonMill] }, { possible: [IndustryType.CoalMine, IndustryType.CottonMill] }, { possible: [IndustryType.IronWorks] }] },

@@ -55,7 +55,7 @@ class Board extends EventEmitter {
 
   createDeck() {
     this.cards = [];
-    cardSet.forEach(cs => { for (let i = 0; i < cs.num; i++) { this.cards.push(cs.card); }; });
+    cardSet.forEach(cs => { for (let i = 0; i < cs.num; i++) { this.cards.push(cs.card); } });
   }
 
   drawCard(): Card | undefined {
