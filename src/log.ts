@@ -18,6 +18,7 @@ export enum GameEventName {
 }
 
 export interface GameEventData {
+  [GameEventName.GameStart]: {numPlayers: number, seed: string},
   [GameEventName.MajorPhaseChange]: {phase: MajorPhase},
   [GameEventName.RoundStart]: {round: number},
   [GameEventName.RefillHand]: {player: PlayerColor, cards: Card[]},

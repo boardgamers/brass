@@ -9,7 +9,6 @@ import { memoize } from "./utils/memoize";
 import BaseEngine from "./utils/base-engine";
 import { MoveName } from "./enums/moves";
 import commands from './commands';
-import { runInThisContext } from "vm";
 import { sortBy } from "lodash";
 
 export class Engine extends BaseEngine<Player, RoundPhase, MoveName, GameEventName, PlayerColor, LogItem> {
@@ -18,7 +17,14 @@ export class Engine extends BaseEngine<Player, RoundPhase, MoveName, GameEventNa
   board: Board;
   majorPhase: MajorPhase;
 
-  init(players: number, seed: string) {
+  init(players: number, seed: string) : void {
+    this.addEvent(GameEventName.GameStart, { numPlayers: players, seed });
+    this.addEvent(GameEventName.MajorPhaseChange, { phase: MajorPhase.CanalPhase });
+    this.addEvent(GameEventName.RoundStart, { round: this.round + 1 });
+    this.roundStart();
+  }
+
+  stateGameStart(players: number, seed: string): void {
     this.seed = seed;
     this.board = new Board();
     this.board.init(players, this.rng);
@@ -35,30 +41,24 @@ export class Engine extends BaseEngine<Player, RoundPhase, MoveName, GameEventNa
       player.on("event", (event, data) => this.addEvent(event.name, { ...data, player: player.color }));
     }
     this.board.on("event", (event, data) => this.addEvent(event.name, data));
-
-    this.addEvent(GameEventName.GameStart);
-    this.majorPhaseChange(MajorPhase.CanalPhase);
   }
 
-  majorPhaseChange(phase: MajorPhase) {
-    this.addEvent(GameEventName.MajorPhaseChange, { phase });
+  stateMajorPhaseStart(phase: MajorPhase): void {
     // set Demand tracks
     // shuffle Distant Market
     this.board.createDeck();
     this.board.cards = shuffle([...this.board.cards], this.rng);
     // discard cards
     this.board.cards = this.board.cards.slice(discard[this.players.length - 3][this.majorPhase]);
-    this.roundStart();
   }
 
-  roundStart() {
-    this.addEvent(GameEventName.RoundStart, { round: this.round + 1 });
+  roundStart() { 
     for (const player of this.players) {
       // reset moves
       player.numMoves = 0;
       // refill cards if still cards to draw
       if (this.board.cards.length > 0) {
-        this.addEvent(GameEventName.RefillHand, { player: player.color, cards: this.board.cards.splice(0, 8 - player.cards.length) });  
+        this.addEvent(GameEventName.RefillHand, { player: player.color, cards: this.board.cards.splice(0, 8 - player.cards.length) });
       }
       // add income
     }
@@ -72,7 +72,7 @@ export class Engine extends BaseEngine<Player, RoundPhase, MoveName, GameEventNa
   }
 
 
-  switchToNextPlayer() {
+  switchToNextPlayer(): void {
     // player has to do two moves. Only one in first round
     if (this.player(this.currentPlayer).numMoves <= 2 && !(this.round === 1)) {
       return;
@@ -96,13 +96,15 @@ export class Engine extends BaseEngine<Player, RoundPhase, MoveName, GameEventNa
 
   processLogItem(item: LogItem) {
     switch (item.kind) {
-      case "event":
+      case "event": {
         const event = item.event;
         switch (event.name) {
           case GameEventName.GameStart:
+            this.stateGameStart(event.numPlayers, event.seed);
             break;
           case GameEventName.MajorPhaseChange:
             this.majorPhase = event.phase;
+            this.stateMajorPhaseStart(this.majorPhase);
             break;
           case GameEventName.RoundStart:
             this.round = event.round;
@@ -121,10 +123,11 @@ export class Engine extends BaseEngine<Player, RoundPhase, MoveName, GameEventNa
             break;
         }
         break;
-      case "move":
+      }
+      case "move": {
         const move = item.move;
         switch (move.name) {
-          case MoveName.TakeLoan:
+          case MoveName.TakeLoan: {
             const player = this.player(item.player);
             player.money += move.data.loan;
             // TD decrease income
@@ -133,19 +136,14 @@ export class Engine extends BaseEngine<Player, RoundPhase, MoveName, GameEventNa
             player.numMoves += 1;
             this.switchToNextPlayer();
             break;
+          }
         }
         break;
+      }
     }
   }
 
-
-
-
-  fillUpPlayerCards(player: Player) {
-
-  }
-
-  get currentPlayer() {
+  get currentPlayer(): PlayerColor {
     return super.currentPlayer;
   }
 
@@ -165,11 +163,6 @@ export class Engine extends BaseEngine<Player, RoundPhase, MoveName, GameEventNa
   @memoize()
   formattedLinks() {
     return this.board.mapLinks();
-  }
-
-  get maxCitiesPerLocation() {
-
-    return 3;
   }
 }
 
