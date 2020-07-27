@@ -5,10 +5,8 @@ import type Card from "./card";
 import cardSet from "./data/cards";
 import { BoardLink, BoardLocation } from "./location";
 import { lancashireLocations, lancashireLinks } from "./maps/lancashire";
-import IndustryType from "./enums/industries";
-import { MajorPhase } from "./enums/phases";
 import { EventEmitter } from "events";
-import { GameEventName } from "./log";
+
 
 class Board extends EventEmitter {
   map: {

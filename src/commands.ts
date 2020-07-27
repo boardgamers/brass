@@ -1,4 +1,4 @@
-import { RoundPhase } from "./enums/phases";
+import { State } from "./enums/phases";
 import { MoveName } from "./enums/moves";
 import type { Engine } from "./engine";
 import type { Player } from "./player";
@@ -18,8 +18,31 @@ export interface CommandArguments {
   [MoveName.TakeLoan]: {card: Card, loan: number};
 }
 
-const commands: CommandStruct<RoundPhase, MoveName, Player, Engine, AvailableCommandArguments, CommandArguments> = {
-  [RoundPhase.PlayCards]: {
+const commands: CommandStruct<State, MoveName, Player, Engine, AvailableCommandArguments, CommandArguments> = {
+  [State.GameSetup]: {
+    started(engine: Engine) {
+      engine.stateGameSetup();
+      engine.addEvent(GameEventName.StateChange, {state: State.PeriodSetup});
+    }
+  },
+  [State.PeriodSetup]: {
+    started(engine: Engine) {
+      engine.statePeriodSetup();
+      engine.addEvent(GameEventName.StateChange, {state: State.RoundSetup});
+    }
+  },
+  [State.RoundSetup]: {
+    started(engine: Engine) {
+      engine.stateRoundSetup();
+      engine.addEvent(GameEventName.StateChange, {state: State.PlayerTurn});
+    }
+  },
+  [State.NextPlayer]: {
+    started(engine: Engine) {
+      engine.stateNextPlayer();
+    }
+  },
+  [State.PlayerTurn]: {
     moves: {
       [MoveName.TakeLoan]: {
         available(engine: Engine, player: Player) {

@@ -165,14 +165,13 @@ export default abstract class BaseEngine<
   }
 
   set phase(phase: Phase) {
-    if (this.#phase && !this.#replaying) {
+    if (this.#phase ) {
       this.commands()[this.#phase]?.ended?.(this);
     }
     this.#phase = phase;
 
-    if (!this.#replaying) {
-      this.commands()[phase]?.started?.(this);
-    }
+    this.commands()[phase]?.started?.(this);
+    this.generateAvailableCommands();
   }
 
   #rng?: seedrandom.prng;

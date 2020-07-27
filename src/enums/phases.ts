@@ -1,9 +1,13 @@
-export enum MajorPhase {
-  CanalPhase = "canal",
-  RailPhase = "rail"
+export enum Period {
+  CanalPeriod = "canal",
+  RailPeriod = "rail"
 }
 
-export enum RoundPhase {
-  PlayCards = "cards",
-
+export enum State {
+  GameSetup = "gamesetup",
+  PeriodSetup = "periodsetup",
+  RoundSetup = "roundsetup",
+  PlayerTurn = "playerturn",
+  NextPlayer = "nextplayer",
+  GameEnd = "gameend"
 }
