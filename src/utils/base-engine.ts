@@ -6,7 +6,7 @@ import { BaseCommandData, AvailableCommand, CommandStruct, MoveNameWithData, Mov
 
 export default abstract class BaseEngine<
   Player,
-  Phase extends string = string,
+  State extends string = string,
   MoveName extends string = string,
   GameEventName extends string = string,
   PlayerId = number,
@@ -19,6 +19,11 @@ export default abstract class BaseEngine<
   log: LogItem[] = [];
   availableCommands?: AvailableCommand<MoveName, AvailableCommandData, PlayerId>[];
   ended = false;
+  #rng?: seedrandom.prng;
+  #seed = "";
+  #currentPlayer: PlayerId;
+  #state: State;
+  #replaying = false;
 
   addLog(item: LogItem) {
     if (!this.#replaying) {
@@ -27,10 +32,10 @@ export default abstract class BaseEngine<
     }
   }
 
-  abstract commands(): CommandStruct<Phase, MoveName, Player, this, AvailableCommandData, CommandData>;
+  abstract commands(): CommandStruct<State, MoveName, Player, this, AvailableCommandData, CommandData>;
 
   generateAvailableCommands() {
-    const functions = this.commands()[this.phase]!.moves!;
+    const functions = this.commands()[this.state]!.moves!;
 
     const availableCommands: AvailableCommand<MoveName, AvailableCommandData, PlayerId>[] = [];
 
@@ -39,7 +44,7 @@ export default abstract class BaseEngine<
         continue;
       }
 
-      asserts<NonNullable<NonNullable<NonNullable<(ReturnType<this["commands"]>)[Phase]>["moves"]>[MoveName]>>(obj);
+      asserts<NonNullable<NonNullable<NonNullable<(ReturnType<this["commands"]>)[State]>["moves"]>[MoveName]>>(obj);
       asserts<MoveName>(move);
 
       if (!obj.available) {
@@ -74,7 +79,7 @@ export default abstract class BaseEngine<
 
     avail = avail?.filter(av => av.move === move.name, `Player ${player} can't execute command ${move.name}`);
 
-    const functions = this.commands()[this.phase]!.moves![move.name]!;
+    const functions = this.commands()[this.state]!.moves![move.name]!;
 
     if (functions.valid && avail && !avail.some(data => functions.valid!((move as any).data, (data as any).data, this, this.player(player)))) {
       assert(false, "The command is not valid with the given arguments");
@@ -134,7 +139,7 @@ export default abstract class BaseEngine<
       seed: this.seed,
       rngState : this.rng.state(),
       players: this.players,
-      phase: this.phase,
+      state: this.state,
       availableCommands: this.availableCommands
     };
   }
@@ -145,7 +150,7 @@ export default abstract class BaseEngine<
     this.seed = data.seed;
     this.#rng = seedrandom("", {state: data.rngState});
     this.players = data.players;
-    this.#phase = data.phase;
+    this.#state = data.state;
     this.availableCommands = data.availableCommands;
   }
 
@@ -157,22 +162,16 @@ export default abstract class BaseEngine<
     this.#currentPlayer = val;
   }
 
-  get phase() {
-    return this.#phase;
+  get state() {
+    return this.#state;
   }
 
-  set phase(phase: Phase) {
-    if (this.#phase ) {
-      this.commands()[this.#phase]?.ended?.(this);
+  set state(state: State) {
+    if (this.#state ) {
+      this.commands()[this.#state]?.ended?.(this);
     }
-    this.#phase = phase;
-    this.addLog({ kind: "event", event: { name: "statechange",  state: phase} } as any as LogItem);
-    this.commands()[phase]?.started?.(this);
+    this.#state = state;
+    this.addLog({ kind: "event", event: { name: "statechange",  state: state} } as any as LogItem);
+    this.commands()[state]?.started?.(this);
   }
-
-  #rng?: seedrandom.prng;
-  #seed = "";
-  #currentPlayer: PlayerId;
-  #phase: Phase;
-  #replaying = false;
 }

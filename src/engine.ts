@@ -34,14 +34,14 @@ export class Engine extends BaseEngine<Player, State, MoveName, GameEventName, P
     }
     this.board.on("event", (event, data) => this.addEvent(event.name, data));
 
-    this.phase = State.GameSetup;
+    this.state = State.GameSetup;
   }
 
   stateGameSetup(): void {
     this.round = 0;
     this.period = Period.CanalPeriod;
     this.addEvent(GameEventName.GameStart);
-    this.phase = State.PeriodSetup;
+    this.state = State.PeriodSetup;
   }
 
   statePeriodSetup(): void {
@@ -51,7 +51,7 @@ export class Engine extends BaseEngine<Player, State, MoveName, GameEventName, P
     this.board.cards = shuffle([...this.board.cards], this.rng);
     // discard cards
     this.board.cards = this.board.cards.slice(discard[this.players.length - 3][this.period]);
-    this.phase = State.RoundSetup;
+    this.state = State.RoundSetup;
   }
 
   stateRoundSetup(): void {
@@ -77,7 +77,7 @@ export class Engine extends BaseEngine<Player, State, MoveName, GameEventName, P
     // set first player
     this.currentPlayer = this.turnorder[0];
     this.addEvent(GameEventName.CurrentPlayer, { player: this.currentPlayer });
-    this.phase = State.PlayerTurn;
+    this.state = State.PlayerTurn;
   }
 
   statePlayerTurn(): void {
@@ -87,7 +87,7 @@ export class Engine extends BaseEngine<Player, State, MoveName, GameEventName, P
   stateNextPlayer(): void {
     // player has to do two moves. Only one in first round
     if (this.player(this.currentPlayer).numMoves <= 2 && !(this.round === 1)) {
-      this.phase = State.PlayerTurn;
+      this.state = State.PlayerTurn;
       return;
     }
 
@@ -95,15 +95,15 @@ export class Engine extends BaseEngine<Player, State, MoveName, GameEventName, P
     if (currentIndex + 1 === this.turnorder.length) {
       // last round
       if (this.round === lastRound[this.players.length - 3] || this.round === 2 * lastRound[this.players.length - 3])
-        this.phase = State.GameEnd;
+        this.state = State.GameEnd;
       else {
-        this.phase = State.RoundSetup;
+        this.state = State.RoundSetup;
 
       }
 
     } else {
       this.currentPlayer = this.turnorder[currentIndex + 1];
-      this.phase = State.PlayerTurn;
+      this.state = State.PlayerTurn;
     }
   }
 
@@ -127,7 +127,7 @@ export class Engine extends BaseEngine<Player, State, MoveName, GameEventName, P
 
             player.cards.splice(player.cards.findIndex(card => (card.city === move.data.card.city || card.industry === move.data.card.industry)), 1);
             player.numMoves += 1;
-            this.phase = State.NextPlayer;
+            this.state = State.NextPlayer;
             break;
           }
         }

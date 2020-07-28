@@ -1,14 +1,14 @@
 import type BaseEngine from "./base-engine";
 
 export type CommandStruct<
-  Phase extends string,
+  State extends string,
   MoveName extends string,
   Player,
   Engine extends BaseEngine<Player, string, string, string, any, any> = BaseEngine<Player>,
   AvailableCommandData extends BaseCommandData<MoveName> = BaseCommandData<MoveName>,
   CommandData extends BaseCommandData<MoveName> = BaseCommandData<MoveName>,
 > = {
-  [phase in Phase]?: {
+  [state in State]?: {
     moves?: {
       [move in MoveName]?: {
         available?: (engine: Engine, player: Player) => _AvailableCommandHelper<MoveName, AvailableCommandData, move>,
