@@ -22,19 +22,16 @@ const commands: CommandStruct<State, MoveName, Player, Engine, AvailableCommandA
   [State.GameSetup]: {
     started(engine: Engine) {
       engine.stateGameSetup();
-      engine.addEvent(GameEventName.StateChange, {state: State.PeriodSetup});
     }
   },
   [State.PeriodSetup]: {
     started(engine: Engine) {
       engine.statePeriodSetup();
-      engine.addEvent(GameEventName.StateChange, {state: State.RoundSetup});
     }
   },
   [State.RoundSetup]: {
     started(engine: Engine) {
       engine.stateRoundSetup();
-      engine.addEvent(GameEventName.StateChange, {state: State.PlayerTurn});
     }
   },
   [State.NextPlayer]: {
@@ -56,6 +53,9 @@ const commands: CommandStruct<State, MoveName, Player, Engine, AvailableCommandA
           return loanOK && cardOK;
         }
       }
+    },
+    started(engine: Engine) {
+      engine.statePlayerTurn();
     }
   }
 };

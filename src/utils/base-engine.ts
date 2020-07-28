@@ -21,8 +21,10 @@ export default abstract class BaseEngine<
   ended = false;
 
   addLog(item: LogItem) {
-    this.log.push(item);
-    this.processLogItem(item);
+    if (!this.#replaying) {
+      this.log.push(item);
+      this.processLogItem(item);
+    }
   }
 
   abstract commands(): CommandStruct<Phase, MoveName, Player, this, AvailableCommandData, CommandData>;
@@ -80,14 +82,9 @@ export default abstract class BaseEngine<
 
     this.addLog({move, kind: "move", player} as any as LogItem);
     functions.exec?.(this, this.player(player), (move as any).data);
-
-    this.afterMove();
   }
 
   afterMove() {
-    if (!this.ended) {
-      this.generateAvailableCommands();
-    }
   }
 
   /**
@@ -169,9 +166,8 @@ export default abstract class BaseEngine<
       this.commands()[this.#phase]?.ended?.(this);
     }
     this.#phase = phase;
-
+    this.addLog({ kind: "event", event: { name: "statechange",  state: phase} } as any as LogItem);
     this.commands()[phase]?.started?.(this);
-    this.generateAvailableCommands();
   }
 
   #rng?: seedrandom.prng;

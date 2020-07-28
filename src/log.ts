@@ -12,7 +12,7 @@ export enum GameEventName {
   RefillHand = "refillhand",
   TurnOrder = "turnorder",
   CurrentPlayer = "currentplayer",
-  StateChange = "phasechange",
+  StateChange = "statechange",
   GameEnd = "gameend"
 }
 
