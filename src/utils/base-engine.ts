@@ -28,7 +28,6 @@ export default abstract class BaseEngine<
   addLog(item: LogItem) {
     if (!this.#replaying) {
       this.log.push(item);
-      this.processLogItem(item);
     }
   }
 
@@ -87,9 +86,6 @@ export default abstract class BaseEngine<
 
     this.addLog({move, kind: "move", player} as any as LogItem);
     functions.exec?.(this, this.player(player), (move as any).data);
-  }
-
-  afterMove() {
   }
 
   /**

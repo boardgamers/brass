@@ -110,6 +110,15 @@ export class Engine extends BaseEngine<Player, State, MoveName, GameEventName, P
   addEvent<name extends GameEventName>(name: name, data?: name extends keyof GameEventData ? GameEventData[name] : undefined) {
     this.addLog({ kind: "event", event: { name, ...(data ?? {}) } as GameEvent });
   }
+  
+  moveTakeLoan( player: Player, data: any ) {
+    player.money += data.loan;
+    // TD decrease income
+
+    player.cards.splice(player.cards.findIndex(card => (card.city === data.card.city || card.industry === data.card.industry)), 1);
+    player.numMoves += 1;
+    this.state = State.NextPlayer;
+  }
 
   processLogItem(item: LogItem) {
     switch (item.kind) {
@@ -121,26 +130,19 @@ export class Engine extends BaseEngine<Player, State, MoveName, GameEventName, P
         const move = item.move;
         switch (move.name) {
           case MoveName.TakeLoan: {
-            const player = this.player(item.player);
-            player.money += move.data.loan;
-            // TD decrease income
-
-            player.cards.splice(player.cards.findIndex(card => (card.city === move.data.card.city || card.industry === move.data.card.industry)), 1);
-            player.numMoves += 1;
-            this.state = State.NextPlayer;
+            this.moveTakeLoan(this.player(item.player),move.data);
             break;
           }
         }
-        break;
       }
     }
-  }
+  } 
 
   get currentPlayer(): PlayerColor {
     return super.currentPlayer;
   }
 
-  set currentPlayer(color: PlayerColor) {
+ set currentPlayer(color: PlayerColor) {
     super.currentPlayer = color;
   }
 

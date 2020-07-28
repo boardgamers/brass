@@ -51,6 +51,9 @@ const commands: CommandStruct<State, MoveName, Player, Engine, AvailableCommandA
           const cardOK = player.cards.some( card => (card.city === move.card.city || card.industry === move.card.industry));
      
           return loanOK && cardOK;
+        },
+        exec(engine, player, data) {
+          engine.moveTakeLoan(player, data);
         }
       }
     },
