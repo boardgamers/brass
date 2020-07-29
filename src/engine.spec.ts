@@ -27,4 +27,15 @@ describe("Engine", () => {
     expect(engine.players[0].money).to.equal(40);
 
   });
+
+  it("should not allow a 30 loan", () => {
+    const moves = [
+      { name: MoveName.TakeLoan, data: { card: { city: "bolton" }, loan: 30 }}
+    ];
+    const engine = new Engine;
+    engine.init(3, "test");
+    engine.players[0].incomeLevel = 2;
+    engine.generateAvailableCommands();
+    expect(() => engine.move(  "yellow", moves[0] )).to.throw();
+  });
 });

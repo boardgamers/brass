@@ -113,8 +113,7 @@ export class Engine extends BaseEngine<Player, State, MoveName, GameEventName, P
   
   moveTakeLoan( player: Player, data: any ) {
     player.money += data.loan;
-    // TD decrease income
-
+    player.reduceIncome(data.loan);
     player.cards.splice(player.cards.findIndex(card => (card.city === data.card.city || card.industry === data.card.industry)), 1);
     player.numMoves += 1;
     this.state = State.NextPlayer;

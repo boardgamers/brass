@@ -44,7 +44,7 @@ const commands: CommandStruct<State, MoveName, Player, Engine, AvailableCommandA
       [MoveName.TakeLoan]: {
         available(engine: Engine, player: Player) {
           // check if can get new loans
-          return {loans: [10, 20, 30]};
+          return {loans: [10, 20, 30].slice(0,Math.min(3,player.incomeLevel))};
         },
         valid(move, available, engine, player) {
           const loanOK = available.loans.includes(move.loan);
