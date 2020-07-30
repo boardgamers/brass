@@ -1,9 +1,9 @@
-import { sortBy, flatten, flattenDeep, fromPairs, pick } from "lodash";
+import { sortBy, flatten, flattenDeep, fromPairs, pick, map } from "lodash";
 import type PlayerColor from "./enums/player-color";
 import { shuffle } from "./utils/random";
 import type Card from "./card";
 import cardSet from "./data/cards";
-import { BoardLink, BoardLocation, BoardNetwork } from "./location";
+import { BoardLink, BoardLocation, BoardNetwork, BoardSpace } from "./location";
 import { lancashireLocations, lancashireLinks, LancashireCity } from "./maps/lancashire";
 import { EventEmitter } from "events";
 import { memoize } from "./utils/memoize";
@@ -11,11 +11,12 @@ import { memoize } from "./utils/memoize";
 class Board extends EventEmitter {
   map: {
     model: "lancashire";
-    locations: BoardLocation[],
-    links: BoardLink[]
+    locations: Map<LancashireCity, BoardSpace[]>
+    links: Map<number, BoardLink>
   };
 
   cards: Card[] = [];
+  locationLinks: Map<string, Map<string, number>>;
   networks: BoardNetwork[] = [];
 
   constructor() {
@@ -28,25 +29,25 @@ class Board extends EventEmitter {
 
     this.map = {
       model: "lancashire",
-      locations: lancashireLocations,
-      links: lancashireLinks
+      locations: new Map(lancashireLocations.map(location => [location.city, location.spaces])),
+      links: new Map(lancashireLinks.map((link, index) => [index, link] as [number, BoardLink]))
     };
 
-    const mapLinks = this.mapLinks();
+    this.locationLinks = this.initLocationLinks();
   }
 
-  mapLinks() {
+  initLocationLinks() {
     const links = new Map<string, Map<string, number>>();
 
-    for (const link of this.map.links) {
+    for (const [id, link] of this.map.links.entries()) {
       if (!links.has(link.nodes[0])) {
         links.set(link.nodes[0], new Map());
       }
       if (!links.has(link.nodes[1])) {
         links.set(link.nodes[1], new Map());
       }
-      links.get(link.nodes[0])!.set(link.nodes[1], link.player ?? -2 );
-      links.get(link.nodes[1])!.set(link.nodes[0], link.player ?? -2 );
+      links.get(link.nodes[0])!.set(link.nodes[1], id);
+      links.get(link.nodes[1])!.set(link.nodes[0], id);
     }
 
     return links;
@@ -62,32 +63,30 @@ class Board extends EventEmitter {
   }
 
   refreshNetworks(): void {
-    function expandCity(fromCity: LancashireCity, network: BoardNetwork): void {
+    function expandCity(fromCity: LancashireCity,  network: BoardNetwork): void {
       network.cities.push(fromCity);
-      const idx = toExpand.findIndex(city => city.city === fromCity);
-      if (idx >= 0) { toExpand.splice(idx, 1); }
-
-      for (const city of links.get(fromCity)!) {
-        if (city[1] >= -1 && !network.cities.some(networkCity => networkCity === city[0])) {
-          expandCity(city[0] as LancashireCity, network);
+      cities.delete(fromCity);
+      
+      for (const [linkedCity, linkId] of locationLinks.get(fromCity)!.entries()) {
+        if ((links.get(linkId)!.player !== undefined) && !network.cities.some(networkCity => networkCity === linkedCity)) {
+          expandCity(linkedCity as LancashireCity, network);
         }
       }
+      
     }
 
-    const toExpand = lancashireLocations;
-    const links = this.formattedLinks();
+    const cities = new Set([...this.map.locations.keys()]);
+    const locationLinks = this.locationLinks;
+    const links = this.map.links;
+
     this.networks = [];
-    while (toExpand.length > 0) {
+    for (const city of cities.keys()) {
       const network: BoardNetwork = { cities: [] };
-      expandCity(toExpand[0].city, network);
+      expandCity(city as LancashireCity, network);
       this.networks.push(network);
     }
   }
 
-  @memoize()
-  formattedLinks() {
-    return this.mapLinks();
-  }
 }
 
 

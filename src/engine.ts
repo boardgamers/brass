@@ -153,11 +153,6 @@ export class Engine extends BaseEngine<Player, State, MoveName, GameEventName, P
   player(color: PlayerColor) {
     return this.players.find(pl => pl.color === color)!;
   }
-
-  @memoize()
-  formattedLinks() {
-    return this.board.mapLinks();
-  }
 }
 
 const discard = [{

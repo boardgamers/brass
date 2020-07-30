@@ -18,11 +18,11 @@ interface BoardSpace {
 
 interface BoardLocation {
   city: LancashireCity;
-  spaces?: BoardSpace[];
+  spaces: BoardSpace[];
 }
 
 interface BoardNetwork {
   cities: LancashireCity[]
 }
 
-export { BoardLink, BoardLocation, BoardNetwork};
+export { BoardLink, BoardLocation, BoardNetwork, BoardSpace};
