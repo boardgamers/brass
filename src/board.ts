@@ -3,10 +3,10 @@ import type PlayerColor from "./enums/player-color";
 import { shuffle } from "./utils/random";
 import type Card from "./card";
 import cardSet from "./data/cards";
-import { BoardLink, BoardLocation } from "./location";
-import { lancashireLocations, lancashireLinks } from "./maps/lancashire";
+import { BoardLink, BoardLocation, BoardNetwork } from "./location";
+import { lancashireLocations, lancashireLinks, LancashireCity } from "./maps/lancashire";
 import { EventEmitter } from "events";
-
+import { memoize } from "./utils/memoize";
 
 class Board extends EventEmitter {
   map: {
@@ -16,6 +16,7 @@ class Board extends EventEmitter {
   };
 
   cards: Card[] = [];
+  networks: BoardNetwork[] = [];
 
   constructor() {
     super();
@@ -44,8 +45,8 @@ class Board extends EventEmitter {
       if (!links.has(link.nodes[1])) {
         links.set(link.nodes[1], new Map());
       }
-      links.get(link.nodes[0])!.set(link.nodes[1], 0);
-      links.get(link.nodes[1])!.set(link.nodes[0], 0);
+      links.get(link.nodes[0])!.set(link.nodes[1], link.player ?? -2 );
+      links.get(link.nodes[1])!.set(link.nodes[0], link.player ?? -2 );
     }
 
     return links;
@@ -58,6 +59,34 @@ class Board extends EventEmitter {
 
   drawCard(): Card | undefined {
     return this.cards.shift();
+  }
+
+  refreshNetworks(): void {
+    function expandCity(fromCity: LancashireCity, network: BoardNetwork): void {
+      network.cities.push(fromCity);
+      const idx = toExpand.findIndex(city => city.city === fromCity);
+      if (idx >= 0) { toExpand.splice(idx, 1); }
+
+      for (const city of links.get(fromCity)!) {
+        if (city[1] >= -1 && !network.cities.some(networkCity => networkCity === city[0])) {
+          expandCity(city[0] as LancashireCity, network);
+        }
+      }
+    }
+
+    const toExpand = lancashireLocations;
+    const links = this.formattedLinks();
+    this.networks = [];
+    while (toExpand.length > 0) {
+      const network: BoardNetwork = { cities: [] };
+      expandCity(toExpand[0].city, network);
+      this.networks.push(network);
+    }
+  }
+
+  @memoize()
+  formattedLinks() {
+    return this.mapLinks();
   }
 }
 

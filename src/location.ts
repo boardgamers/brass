@@ -21,4 +21,8 @@ interface BoardLocation {
   spaces?: BoardSpace[];
 }
 
-export { BoardLink, BoardLocation};
+interface BoardNetwork {
+  cities: LancashireCity[]
+}
+
+export { BoardLink, BoardLocation, BoardNetwork};
