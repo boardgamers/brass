@@ -7,7 +7,7 @@ const industries: Map<IndustryName, Industry> = new Map([
   ["cotton2", { type: IndustryType.CottonMill, level: 2, cost: { money: 14, coal: 1 }, income: 4, vp: 5, production: {} }],
   ["cotton3", { type: IndustryType.CottonMill, level: 3, cost: { money: 16, coal: 1, iron: 1 }, income: 3, vp: 9, production: {} }],
   ["cotton4", { type: IndustryType.CottonMill, level: 4, cost: { money: 18, coal: 1, iron: 1 }, income: 2, vp: 12, production: {} }],
-  ["port0", { type: IndustryType.Port, level: 5, cost: { money: 0}, income: 0, vp: 0, production: {} }], //used for external ports
+  ["port0", { type: IndustryType.Port, level: 5, cost: { money: 0 }, income: 0, vp: 0, production: {} }], //used for external ports
   ["port1", { type: IndustryType.Port, level: 1, cost: { money: 6 }, income: 3, vp: 2, production: {}, period: Period.CanalPeriod }],
   ["port2", { type: IndustryType.Port, level: 2, cost: { money: 7 }, income: 3, vp: 4, production: {} }],
   ["port3", { type: IndustryType.Port, level: 3, cost: { money: 8 }, income: 4, vp: 6, production: {} }],
@@ -26,27 +26,13 @@ const industries: Map<IndustryName, Industry> = new Map([
   ["generic", { type: IndustryType.Generic, level: 5, cost: { money: 0 }, income: 0, vp: 0, production: {} }],
 ]);
 
-const industrySet: Array<{ num: number, industry: IndustryName }> = [
-  { num: 3, industry: "cotton1" },
-  { num: 3, industry: "cotton2" },
-  { num: 3, industry: "cotton3" },
-  { num: 3, industry: "cotton4" },
-  { num: 2, industry: "port1" },
-  { num: 2, industry: "port2" },
-  { num: 2, industry: "port3" },
-  { num: 2, industry: "port4" },
-  { num: 1, industry: "coal1" },
-  { num: 2, industry: "coal2" },
-  { num: 2, industry: "coal3" },
-  { num: 2, industry: "coal4" },
-  { num: 1, industry: "iron1" },
-  { num: 1, industry: "iron2" },
-  { num: 1, industry: "iron3" },
-  { num: 1, industry: "iron4" },
-  { num: 2, industry: "ship0" },
-  { num: 2, industry: "ship1" },
-  { num: 2, industry: "ship2" }
 
-];
+const industryDeck: Map<IndustryType, IndustryName[]> = new Map([
+  [IndustryType.CottonMill, ["cotton1", "cotton1", "cotton1", "cotton2", "cotton2", "cotton2", "cotton3", "cotton3", "cotton3", "cotton4", "cotton4", "cotton4"]],
+  [IndustryType.Port, ["port1", "port1", "port2", "port2", "port3", "port3", "port4", "port4"]],
+  [IndustryType.CoalMine, ["coal1", "coal2", "coal2", "coal3", "coal3", "coal4", "coal4"]],
+  [IndustryType.IronWorks, ["iron1", "iron2", "iron3", "iron4"]],
+  [IndustryType.Shipyard, ["ship0", "ship0", "ship1", "ship1", "ship2", "ship2"]]
+]);
 
-export { industries, industrySet };
+export { industries, industryDeck };
