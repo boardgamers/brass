@@ -1,6 +1,7 @@
 export enum Period {
   CanalPeriod = "canal",
-  RailPeriod = "rail"
+  RailPeriod = "rail",
+  NeverPeriod = "never"
 }
 
 export enum State {
