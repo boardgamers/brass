@@ -5,7 +5,6 @@ import type { Player } from "./player";
 import type Card from "./card";
 import type { CommandStruct, Command as BaseCommand } from "./utils/commands";
 import { GameEventName } from "./log";
-import Resource from "./enums/resource";
 import { fromPairs, inRange, sum, sumBy } from "lodash";
 import shortestPath from "./utils/shortest-path";
 import { link } from "fs";

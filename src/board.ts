@@ -5,6 +5,7 @@ import type Card from "./card";
 import cardSet from "./data/cards";
 import { BoardLink, BoardLocation, BoardNetwork, BoardSpace } from "./location";
 import { lancashireLocations, lancashireLinks, LancashireCity } from "./maps/lancashire";
+import Market from "./enums/market";
 import { EventEmitter } from "events";
 import { memoize } from "./utils/memoize";
 
@@ -18,6 +19,7 @@ class Board extends EventEmitter {
   cards: Card[] = [];
   locationLinks: Map<string, Map<string, number>>;
   networks: BoardNetwork[] = [];
+  markets: { [key in Market]: number };
 
   constructor() {
     super();
@@ -34,6 +36,7 @@ class Board extends EventEmitter {
     };
 
     this.locationLinks = this.initLocationLinks();
+    this.markets = { coal: 8, iron: 8, cotton: 8 };
   }
 
   initLocationLinks() {
@@ -63,16 +66,16 @@ class Board extends EventEmitter {
   }
 
   refreshNetworks(): void {
-    function expandCity(fromCity: LancashireCity,  network: BoardNetwork): void {
+    function expandCity(fromCity: LancashireCity, network: BoardNetwork): void {
       network.cities.push(fromCity);
       cities.delete(fromCity);
-      
+
       for (const [linkedCity, linkId] of locationLinks.get(fromCity)!.entries()) {
         if ((links.get(linkId)!.player !== undefined) && !network.cities.some(networkCity => networkCity === linkedCity)) {
           expandCity(linkedCity as LancashireCity, network);
         }
       }
-      
+
     }
 
     const cities = new Set([...this.map.locations.keys()]);
@@ -85,6 +88,13 @@ class Board extends EventEmitter {
       expandCity(city as LancashireCity, network);
       this.networks.push(network);
     }
+  }
+
+  marketCost(market: Market): number {
+    if (market === "cotton") {
+      return Math.floor((this.markets.cotton - 1) / 2);
+    }
+    return 5 - Math.ceil(this.markets[market] / 2);
   }
 
 }
