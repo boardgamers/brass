@@ -8,17 +8,18 @@ import { lancashireLocations, lancashireLinks, LancashireCity } from "./maps/lan
 import Market from "./enums/market";
 import { EventEmitter } from "events";
 import { memoize } from "./utils/memoize";
+import IndustryType from "./enums/industries";
 
 class Board extends EventEmitter {
-  map: {
-    model: "lancashire";
-    locations: Map<LancashireCity, BoardSpace[]>
-    links: Map<number, BoardLink>
-  };
 
-  cards: Card[] = [];
+  model: "lancashire";
+  locations: Map<LancashireCity, { spaces: string[] }>;
+  spaces: Map<string, BoardSpace>;
+  links: Map<number, BoardLink>;
   locationLinks: Map<string, Map<string, number>>;
   networks: BoardNetwork[] = [];
+
+  cards: Card[] = [];
   markets: { [key in Market]: number };
 
   constructor() {
@@ -28,21 +29,28 @@ class Board extends EventEmitter {
   init(players: number, rng: () => number) {
     this.cards = [];
     // populates the board
+    this.locations = new Map();
+    this.spaces = new Map();
 
-    this.map = {
-      model: "lancashire",
-      locations: new Map(lancashireLocations.map(location => [location.city, location.spaces])),
-      links: new Map(lancashireLinks.map((link, index) => [index, link] as [number, BoardLink]))
-    };
-
+    this.links = new Map(lancashireLinks.map((link, index) => [index, link] as [number, BoardLink]));
     this.locationLinks = this.initLocationLinks();
+    lancashireLocations.forEach(location => {
+      const locSpaces: string[] = [];
+      location.spaces?.forEach((space, index) => {
+        const id = location.city + '_' + index;
+        this.spaces.set(id, { city: location.city, ...space });
+        locSpaces.push(id);
+      });
+      this.locations.set(location.city, { spaces: locSpaces });
+    });
+
     this.markets = { coal: 8, iron: 8, cotton: 8 };
   }
 
   initLocationLinks() {
     const links = new Map<string, Map<string, number>>();
 
-    for (const [id, link] of this.map.links.entries()) {
+    for (const [id, link] of this.links.entries()) {
       if (!links.has(link.nodes[0])) {
         links.set(link.nodes[0], new Map());
       }
@@ -78,9 +86,9 @@ class Board extends EventEmitter {
 
     }
 
-    const cities = new Set([...this.map.locations.keys()]);
+    const cities = new Set([...this.locations.keys()]);
     const locationLinks = this.locationLinks;
-    const links = this.map.links;
+    const links = this.links;
 
     this.networks = [];
     for (const city of cities.keys()) {
@@ -95,6 +103,16 @@ class Board extends EventEmitter {
       return Math.floor((this.markets.cotton - 1) / 2);
     }
     return 5 - Math.ceil(this.markets[market] / 2);
+  }
+
+  ironSpaces(): string[] {
+    const found: string[] = [];
+    for (const space of this.spaces) {
+      if (space[1].resources?.iron ?? 0 > 0) {
+        found.push(space[0]);
+      }
+    }
+    return found;
   }
 
 }

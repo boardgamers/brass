@@ -4,6 +4,11 @@ export enum Period {
   NeverPeriod = "never"
 }
 
+export enum Phase {
+  PlayerTurn = "playerturn",
+  Development = "development"
+}
+
 export enum State {
   GameSetup = "gamesetup",
   PeriodSetup = "periodsetup",

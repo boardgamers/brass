@@ -3,7 +3,7 @@ import type PlayerColor from "./enums/player-color";
 import Board from "./board";
 import Card from "./card";
 import { shuffle } from "./utils/random";
-import { State, Period } from "./enums/phases";
+import { State, Period, Phase } from "./enums/phases";
 import { LogItem, GameEventName, GameEventData, GameEvent } from "./log";
 import { memoize } from "./utils/memoize";
 import BaseEngine from "./utils/base-engine";
@@ -16,6 +16,7 @@ export class Engine extends BaseEngine<Player, State, MoveName, GameEventName, P
 
   board: Board;
   period: Period;
+  phase: Phase | undefined;
 
   init(players: number, seed: string): void {
     this.seed = seed;
@@ -61,6 +62,7 @@ export class Engine extends BaseEngine<Player, State, MoveName, GameEventName, P
     for (const player of this.players) {
       // reset moves
       player.numMoves = 0;
+      player.numSubMoves = 0;
       // refill cards if still cards to draw
       if (this.board.cards.length > 0) {
         const cards = this.board.cards.splice(0, 8 - player.cards.length);
@@ -85,8 +87,19 @@ export class Engine extends BaseEngine<Player, State, MoveName, GameEventName, P
   }
 
   stateNextPlayer(): void {
+    const player = this.player(this.currentPlayer);
+    // Development phase
+    if (this.phase === Phase.Development ) {
+      if ( player.numSubMoves === 2 ){
+        player.numMoves +=1 ;
+        this.phase = undefined;
+      } else  {
+        this.state = State.PlayerTurn;
+        return;
+      }
+    }
     // player has to do two moves. Only one in first round
-    if (this.player(this.currentPlayer).numMoves <= 2 && !(this.round === 1)) {
+    if (player.numMoves === 1 && !(this.round === 1)) {
       this.state = State.PlayerTurn;
       return;
     }
@@ -98,9 +111,7 @@ export class Engine extends BaseEngine<Player, State, MoveName, GameEventName, P
         this.state = State.GameEnd;
       else {
         this.state = State.RoundSetup;
-
       }
-
     } else {
       this.currentPlayer = this.turnorder[currentIndex + 1];
       this.state = State.PlayerTurn;
@@ -110,12 +121,35 @@ export class Engine extends BaseEngine<Player, State, MoveName, GameEventName, P
   addEvent<name extends GameEventName>(name: name, data?: name extends keyof GameEventData ? GameEventData[name] : undefined) {
     this.addLog({ kind: "event", event: { name, ...(data ?? {}) } as GameEvent });
   }
-  
-  moveTakeLoan( player: Player, data: any ) {
+
+  moveTakeLoan(player: Player, data: any) {
     player.money += data.loan;
     player.reduceIncome(data.loan);
     player.cards.splice(player.cards.findIndex(card => (card.city === data.card.city || card.industry === data.card.industry)), 1);
     player.numMoves += 1;
+    this.state = State.NextPlayer;
+  }
+
+  moveDevelopment(player: Player, data: any) {
+    for (const industryDeck of player.industries.values()) {
+      if (industryDeck[0] === data.discard) {
+        industryDeck.splice(0, 1);
+        break;
+      }
+    }
+    if (data.ironFrom) {
+      this.board.spaces.get(data.ironFrom)!.resources!.iron! -= 1;
+    } else {
+      player.money -= this.board.marketCost("iron");
+      this.board.markets.iron -= 1;
+    }
+     this.phase = Phase.Development;
+    player.numSubMoves += 1;
+    this.state = State.NextPlayer;
+  }
+
+  movePassDevelopment(player: Player, data: any) {
+    player.numSubMoves += 1;
     this.state = State.NextPlayer;
   }
 
@@ -129,19 +163,19 @@ export class Engine extends BaseEngine<Player, State, MoveName, GameEventName, P
         const move = item.move;
         switch (move.name) {
           case MoveName.TakeLoan: {
-            this.moveTakeLoan(this.player(item.player),move.data);
+            this.moveTakeLoan(this.player(item.player), move.data);
             break;
           }
         }
       }
     }
-  } 
+  }
 
   get currentPlayer(): PlayerColor {
     return super.currentPlayer;
   }
 
- set currentPlayer(color: PlayerColor) {
+  set currentPlayer(color: PlayerColor) {
     super.currentPlayer = color;
   }
 

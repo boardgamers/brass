@@ -13,7 +13,7 @@ describe("Board", () => {
     board.refreshNetworks();
     // 25 cities but three ports connected = 1 network
     expect(board.networks.length).to.equal(23);
-    board.map.links.get(0)!.player = 0;
+    board.links.get(0)!.player = 0;
     board.refreshNetworks();
     expect(board.networks.length).to.equal(22);
 

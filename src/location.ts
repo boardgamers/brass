@@ -9,6 +9,7 @@ interface BoardLink {
 }
 
 interface BoardSpace {
+  city?: LancashireCity;
   possible?: IndustryType[];
   industry?: string;
   player?: number;

@@ -2,7 +2,6 @@ import { State, Period } from "./enums/phases";
 import type PlayerColor from "./enums/player-color";
 import type { Command } from "./commands";
 import { MoveName } from "./enums/moves";
-import Resource from "./enums/resource";
 import Card from "./card";
 
 export enum GameEventName {

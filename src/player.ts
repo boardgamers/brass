@@ -2,11 +2,13 @@ import type Market from "./enums/market";
 import type PlayerColor from "./enums/player-color";
 import type Card from "./card";
 
-import { sumBy, ceil } from "lodash";
+import { sumBy, ceil, cloneDeep } from "lodash";
 import { EventEmitter } from "events";
 import { GameEventName } from "./log";
-import { Industry } from "./industry";
+
 import IndustryType from "./enums/industries";
+import { Industry,  IndustryName } from "./industry";
+import {industryDeck} from "./data/industries";
 import { BoardLocation } from "./location";
 
 export class Player extends EventEmitter {
@@ -17,18 +19,21 @@ export class Player extends EventEmitter {
   incomeLevel = 10;
   cards: Card[] = [];
   locations: BoardLocation[] = [];
-  industries: { [key in IndustryType]: number } = { cotton: 0, port: 0, coal: 0, iron: 0, ship: 0, generic:0 };
+  industries:  Map<IndustryType, IndustryName[]>;
   linksAvailable = 12;
   numMoves = 0;
+  numSubMoves = 0;
 
 
   constructor(public color: PlayerColor, initialBid: number) {
     super();
     this.spent = initialBid;
+    this.industries = cloneDeep(industryDeck);
   }
 
   init() {
     // assign industries cards
+
   }
 
   beginRound() {
